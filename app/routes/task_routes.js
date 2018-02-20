@@ -9,6 +9,11 @@ function handleError(res, reason, message, code) {
 
 module.exports = function(app, db) {
 
+	app.get('/*', function(req, res) {
+	  res.sendFile(path.join(__dirname + '/public/index.html'));
+	});
+
+
     app.get('/api/tasks', (req, res) => {
 
         const id = '5a851af3d071fe03aca92e36';//req.params.id;
