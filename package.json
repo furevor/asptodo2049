@@ -12,7 +12,8 @@
     "nodemon": "^1.11.0"
   },
   "scripts": {
-    "dev": "server.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "furevor",
   "license": "ISC"
