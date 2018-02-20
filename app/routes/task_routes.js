@@ -9,9 +9,9 @@ function handleError(res, reason, message, code) {
 
 module.exports = function(app, db) {
 
-	app.get('*/', function(req, res) {
+	/*app.get('*/', function(req, res) {
 	  res.sendFile(path.join(__dirname + '/public/index.html'));
-	});
+	});*/
 
 
     app.get('/api/tasks', (req, res) => {
