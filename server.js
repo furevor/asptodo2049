@@ -18,7 +18,7 @@ MongoClient.connect(db.url, (err, database) => {
 
 
     require('./app/routes')(app, myAwesomeDB);
-    app.listen(process.env.PORT || 8080, () => {
+    var server = app.listen(process.env.PORT || 8080, () => {
 		var port = server.address().port;
         console.log("App now running on port", port);
     });
