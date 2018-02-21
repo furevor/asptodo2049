@@ -1,5 +1,5 @@
 var ObjectID = require('mongodb').ObjectID;
-
+var request = require('request');
 
 function handleError(res, reason, message, code) {
     console.log("ERROR: " + reason);
@@ -70,6 +70,52 @@ module.exports = function(app, db) {
         });
     });
      */
+	 
+	 
+	var secretstring = "";
+
+    app.get('/', (req, res) => {
+
+        if(req.query.code != undefined && req.query.state != undefined) {
+            if(req.query.state == "lunartemple2112")
+            {
+                secretstring = req.query.code;
+                console.log("success!!");
+
+                var bodyData = {
+                    client_id: '5b2714d62ded4a8dbc11cd22cdb5cb87',
+					client_secret: '1d8df6f955344f6f86b299d88a91b0cc',
+					code: secretstring,
+					redirect_uri: 'https://asptodo-2049.herokuapp.com/'
+                }
+
+
+                updateClient(bodyTest);
+            }
+        }
+        else
+        {
+            console.log('heheheh');
+        }
+
+
+    });
+
+
+    function updateClient(postData){
+        var clientServerOptions = {
+            uri: 'https://todoist.com/oauth/access_token',
+            body: JSON.stringify(postData),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+        request(clientServerOptions, function (error, response) {
+            console.log(error, response.body);
+            return;
+        });
+    } 
 
     app.delete('/api/tasks/:id', (req, res) => {
 
