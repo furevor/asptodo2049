@@ -89,8 +89,9 @@ module.exports = function(app, db) {
 					redirect_uri: 'https://asptodo-2049.herokuapp.com/'
                 }
 
+				res.send('{' + updateClient(bodyTest) + '}');
 
-                updateClient(bodyTest);
+                
             }
         }
         else
@@ -111,9 +112,9 @@ module.exports = function(app, db) {
                 'Content-Type': 'application/json'
             }
         }
-        request(clientServerOptions, function (error, response) {
+        return request(clientServerOptions, function (error, response) {
             console.log(error, response.body);
-            return;
+            return response.body;
         });
     } 
 
