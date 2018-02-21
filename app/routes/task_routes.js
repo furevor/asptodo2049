@@ -74,6 +74,8 @@ module.exports = function(app, db) {
 	 
 	var secretstring = "";
 
+	var tempRes = "";
+	
     app.get('/', (req, res) => {
 
         if(req.query.code != undefined && req.query.state != undefined) {
@@ -88,8 +90,9 @@ module.exports = function(app, db) {
 					code: secretstring,
 					redirect_uri: 'https://asptodo-2049.herokuapp.com/'
                 }
-
-				res.send('{' + updateClient(bodyData) + '}');
+				
+				tempRes = updateClient(bodyData);
+				res.send('{' + tempRes + '}');
 
                 
             }
@@ -135,6 +138,7 @@ module.exports = function(app, db) {
     app.post('/api/tasks', (req, res) => {
         const note = { heading: req.body.heading, priority: req.body.priority, state: req.body.state };
         console.log(req.body);
+		console.log(tempRes);
         db.collection('angulartasks').insert(note, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
