@@ -194,12 +194,12 @@ module.exports = function(app, db) {
     });
 
 
-    app.get('/api/import', (req, res) => {
+    app.get('/api/import', (req, res, next) => {
         console.log('hello from here!!!');
         var options = {
             url: 'https://todoist.com/api/v7/sync',
             headers: {
-                'token': tempRes,
+                'token': 'acc886eff36a46bd58aad5415a5e898143e93768',
                 'sync_token': '*',
                 'resource_types': '["projects"]'
 
@@ -207,14 +207,21 @@ module.exports = function(app, db) {
         };
 
         function callback(error, response, body) {
+            console.log('hello from callback!!!');
+            console.log(response.statusCode);
+
             if (!error && response.statusCode == 200) {
                 var info = JSON.parse(body);
                 console.log(info.stargazers_count + " Stars");
                 console.log(info.forks_count + " Forks");
             }
+            res.myRandomMember = response.statusCode;
+            next();
         }
 
         request(options, callback);
+    }, (req, res) => {
+        res.send(res.myRandomMember);
     });
 
 
