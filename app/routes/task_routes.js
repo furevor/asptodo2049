@@ -221,7 +221,7 @@ module.exports = function(app, db) {
 
         request(options, callback);
     }, (req, res) => {
-        res.send(res.myRandomMember);
+        res.sendStatus(res.myRandomMember);
     });
 
 
