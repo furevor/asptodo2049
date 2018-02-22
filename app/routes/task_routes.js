@@ -197,13 +197,12 @@ module.exports = function(app, db) {
     app.get('/api/import', (req, res, next) => {
         console.log('hello from here!!!');
         var options = {
+            method: 'GET',
             url: 'https://todoist.com/api/v7/sync',
-            headers: {
                 'token': 'acc886eff36a46bd58aad5415a5e898143e93768',
                 'sync_token': '*',
                 'resource_types': '["projects"]'
 
-            }
         };
 
         function callback(error, response, body) {
