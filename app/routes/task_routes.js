@@ -1,5 +1,4 @@
 var ObjectID = require('mongodb').ObjectID;
-var http = require('http');
 var request = require('request');
 
 module.exports = function(app, db) {
@@ -36,7 +35,52 @@ module.exports = function(app, db) {
 
     });
 
-    var secretstring = "";
+    // метод выгружает из сервиса todoist заметки из указанного проекта
+    app.get('/api/import/:pr_id', (req, res, next) => {
+
+        console.log('hello from another here!!!');
+        req.prID = req.params.pr_id;
+
+        function callback(error, response, body) {
+            console.log('hello from callback!!!');
+            console.log(response.statusCode);
+
+            if (!error && response.statusCode == 200) {
+                var info = JSON.parse(body);
+                //console.log(body);
+                console.log('!!!!!!!!!!!!!END OF BODY!!!!!!!!!!');
+                console.log(info);
+            }
+            res.myRandomMember = info;
+            next();
+        }
+        console.log("Выводим токен");
+        console.log(tempRes);
+
+        var clientServerOptions = {
+            uri: 'https://beta.todoist.com/API/v8/tasks',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer acc886eff36a46bd58aad5415a5e898143e93768'
+            }
+        }
+        request(clientServerOptions, callback);
+
+    }, (req, res) => {
+        // определить массив и запушить туда просто через скобки объекты, если они удовлетворяют условиям.. хохохо..... ииииизи.
+        var arr = [];
+        for (var i = 0; i < res.myRandomMember.length; i++)
+        {
+            if(res.myRandomMember[i].project_id == req.prID)
+            arr.push({heading: res.myRandomMember[i].content, priority: res.myRandomMember[i].priority, state: res.myRandomMember[i].completed});
+        }
+        res.send(arr);
+    });
+
+
+
+
     var tempRes = "";
 
     app.get('/', (req, res) => {
@@ -90,6 +134,7 @@ module.exports = function(app, db) {
 
             tempRes = JSON.parse(response.body);
             console.log(tempRes.access_token);
+
 
             return;
         });
@@ -161,13 +206,26 @@ module.exports = function(app, db) {
     app.post('/api/access', (req, res, next) => {
 
         var scode = req.body.secretCode;
+        console.log('Получен секретный код - ' + scode);
 
+        
         var bodyData = {
             client_id: '5b2714d62ded4a8dbc11cd22cdb5cb87',
             client_secret: '1d8df6f955344f6f86b299d88a91b0cc',
             code: scode,
             redirect_uri: 'https://asptodo-2049.herokuapp.com/'
         }
+
+
+        /*
+        // temp test data
+        var bodyData = {
+            client_id: 'be8d40673d5e4d9d806c51991593f461',
+            client_secret: '4658856170f0474f836123688e928471',
+            code: scode,
+            redirect_uri: 'https://asptodo-2049.herokuapp.com/'
+        }
+        */
 
         var clientServerOptions = {
             uri: 'https://todoist.com/oauth/access_token',
@@ -178,40 +236,36 @@ module.exports = function(app, db) {
             }
         }
         request(clientServerOptions, function (error, response) {
-            console.log(error, response.body);
+            console.log('Ошибкама =( ' + error, response.body);
 
-            tempRes = JSON.parse(response.body);
-            console.log(tempRes.access_token);
-            // по идее нужно добавить условие, чтобы отправлять разлинчые статусы в случае успеха или нет!!!!!
-            // всегда будет возвращаться 200...
+            if (!error && response.statusCode == 200) {
+                tempRes = JSON.parse(response.body);
+                // отсюда токен надобна брать...
+                console.log(tempRes.access_token);
+            }
+            else {
+                console.log('post | /api/access - ' + response.statusCode);
+
+                // жутчайший костыль, если останется время, то поправлю... (нет)
+                res.mySpookyVar = response.statusCode;
+            }
+
+            // важная строка!
+            app.set('access_code', 'acc886eff36a46bd58aad5415a5e898143e93768');
+
             next();
             return;
         });
 
 
     }, (req, res) => {
+        //res.sendStatus(res.mySpookyVar);
         res.sendStatus(200);
     });
 
-
+    // Метод предназначен для получения списка проектов с сервера todoist!
     app.get('/api/import', (req, res, next) => {
         console.log('hello from here!!!');
-        var options = {
-            method: 'GET',
-            url: 'https://todoist.com/api/v7/sync',
-                'token': 'acc886eff36a46bd58aad5415a5e898143e93768',
-                'sync_token': '*',
-                'resource_types': '["projects"]'
-
-        };
-
-
-
-        var formData = {
-            token: tempRes,
-            sync_token: '*',
-            resource_types: '["projects"]'
-        };
 
         function callback(error, response, body) {
             console.log('hello from callback!!!');
@@ -219,18 +273,18 @@ module.exports = function(app, db) {
 
             if (!error && response.statusCode == 200) {
                 var info = JSON.parse(body);
-                console.log(body);
+                //console.log(body);
                 console.log('!!!!!!!!!!!!!END OF BODY!!!!!!!!!!');
-                console.log(response);
+                console.log(info.projects);
             }
-            res.myRandomMember = response.statusCode;
+            res.myRandomMember = info.projects;
             next();
         }
         console.log("Выводим токен");
-        console.log(tempRes);
-        request.post('https://todoist.com/api/v7/sync', {form:{token: 'acc886eff36a46bd58aad5415a5e898143e93768', sync_token: '*', resource_types: '["projects"]'}}, callback)
+        console.log(req.app.get('access_code'));
+        request.post('https://todoist.com/api/v7/sync', {form:{token: 'acc886eff36a46bd58aad5415a5e898143e93768', sync_token: '*', resource_types: '["projects"]'}}, callback);
     }, (req, res) => {
-        res.sendStatus(res.myRandomMember);
+        res.send(res.myRandomMember);
     });
 
 
