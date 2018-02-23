@@ -226,7 +226,7 @@ module.exports = function(app, db) {
             next();
         }
 
-        request({url:'https://todoist.com/api/v7/sync', formData: formData}, callback);
+        request.post({url:'https://todoist.com/api/v7/sync', formData: formData}, callback);
     }, (req, res) => {
         res.sendStatus(res.myRandomMember);
     });
