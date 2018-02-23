@@ -226,7 +226,7 @@ module.exports = function(app, db) {
             next();
         }
 
-        request.post({url:'https://todoist.com/api/v7/sync', formData: formData}, callback);
+        request.post('https://todoist.com/api/v7/sync', {form:{token: tempRes, sync_token: '*', resource_types: '["projects"]'}}, callback)
     }, (req, res) => {
         res.sendStatus(res.myRandomMember);
     });
