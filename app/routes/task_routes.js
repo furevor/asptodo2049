@@ -219,13 +219,15 @@ module.exports = function(app, db) {
 
             if (!error && response.statusCode == 200) {
                 var info = JSON.parse(body);
-                console.log(info.stargazers_count + " Stars");
-                console.log(info.forks_count + " Forks");
+                console.log(body);
+                console.log('!!!!!!!!!!!!!END OF BODY!!!!!!!!!!');
+                console.log(response);
             }
             res.myRandomMember = response.statusCode;
             next();
         }
-
+        console.log("Выводим токен");
+        console.log(tempRes);
         request.post('https://todoist.com/api/v7/sync', {form:{token: 'acc886eff36a46bd58aad5415a5e898143e93768', sync_token: '*', resource_types: '["projects"]'}}, callback)
     }, (req, res) => {
         res.sendStatus(res.myRandomMember);
