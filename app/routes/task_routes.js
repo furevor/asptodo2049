@@ -205,6 +205,14 @@ module.exports = function(app, db) {
 
         };
 
+
+
+        var formData = {
+            token: tempRes,
+            sync_token: '*',
+            resource_types: '["projects"]'
+        };
+
         function callback(error, response, body) {
             console.log('hello from callback!!!');
             console.log(response.statusCode);
@@ -218,7 +226,7 @@ module.exports = function(app, db) {
             next();
         }
 
-        request(options, callback);
+        request({url:'https://todoist.com/api/v7/sync', formData: formData}, callback);
     }, (req, res) => {
         res.sendStatus(res.myRandomMember);
     });
