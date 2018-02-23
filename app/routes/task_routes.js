@@ -62,7 +62,7 @@ module.exports = function(app, db) {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer acc886eff36a46bd58aad5415a5e898143e93768'
+                'Authorization': 'Bearer ' + app.locals.accessCode
             }
         }
         request(clientServerOptions, callback);
@@ -282,7 +282,7 @@ module.exports = function(app, db) {
             next();
         }
         console.log("Выводим токен");
-        console.log(req.app.get('access_code'));
+        console.log(app.locals.accessCode);
         request.post('https://todoist.com/api/v7/sync', {form:{token: app.locals.accessCode, sync_token: '*', resource_types: '["projects"]'}}, callback);
     }, (req, res) => {
         res.send(res.myRandomMember);
