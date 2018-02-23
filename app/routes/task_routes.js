@@ -208,7 +208,7 @@ module.exports = function(app, db) {
         var scode = req.body.secretCode;
         console.log('Получен секретный код - ' + scode);
 
-        
+
         var bodyData = {
             client_id: '5b2714d62ded4a8dbc11cd22cdb5cb87',
             client_secret: '1d8df6f955344f6f86b299d88a91b0cc',
@@ -251,7 +251,8 @@ module.exports = function(app, db) {
             }
 
             // важная строка!
-            app.set('access_code', 'acc886eff36a46bd58aad5415a5e898143e93768');
+            //app.set('access_code', 'acc886eff36a46bd58aad5415a5e898143e93768');
+            app.locals.accessCode = tempRes.access_token;
 
             next();
             return;
@@ -282,11 +283,11 @@ module.exports = function(app, db) {
         }
         console.log("Выводим токен");
         console.log(req.app.get('access_code'));
-        request.post('https://todoist.com/api/v7/sync', {form:{token: 'acc886eff36a46bd58aad5415a5e898143e93768', sync_token: '*', resource_types: '["projects"]'}}, callback);
+        request.post('https://todoist.com/api/v7/sync', {form:{token: app.locals.accessCode, sync_token: '*', resource_types: '["projects"]'}}, callback);
     }, (req, res) => {
         res.send(res.myRandomMember);
     });
 
-
+/* acc886eff36a46bd58aad5415a5e898143e93768 */
 
 };
