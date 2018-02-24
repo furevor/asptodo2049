@@ -81,6 +81,7 @@ module.exports = function(app, db) {
 
 
 
+
     var tempRes = "";
 
     app.get('/', (req, res) => {
@@ -176,15 +177,31 @@ module.exports = function(app, db) {
     });
 
     app.post('/api/tasks', (req, res) => {
-        const note = { heading: req.body.heading, priority: req.body.priority, state: req.body.state };
-        console.log(req.body);
-        db.collection('angulartasks').insert(note, (err, result) => {
+        //var notes = JSON.parse(req.body);
+        //const note = { heading: req.body.heading, priority: req.body.priority, state: req.body.state };
+
+        var arrData = [];
+
+        // сомнительное решение конечно, но на скорую руку ничего лучше и понятнее не нашёл
+        if(Array.isArray(req.body)) {
+            req.body.forEach((dataItem) => {
+            arrData.push({ heading: dataItem.heading, priority: dataItem.priority, state: dataItem.state });
+            });
+        }
+        else
+        {
+            arrData.push({ heading: req.body.heading, priority: req.body.priority, state: req.body.state });
+        }
+
+        db.collection('angulartasks').insert(arrData, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
                 res.send(result.ops[0]);
             }
         });
+
+
     });
 
     app.put('/api/tasks/:id', (req, res) => {
