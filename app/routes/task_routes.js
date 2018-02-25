@@ -200,8 +200,8 @@ module.exports = function (app, db) {
         });
 
     }, (req, res) => {
-        res.sendStatus(200);
-		//res.sendStatus(res.mySpookyVar);
+        //res.sendStatus(200);
+		res.sendStatus(res.mySpookyVar);
     });
 
     // Метод предназначен для получения списка проектов с сервера todoist!
