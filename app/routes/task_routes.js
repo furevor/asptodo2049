@@ -103,39 +103,39 @@ module.exports = function(app, db) {
 
 
     app.get('/', (req, res) => {
-    /*
-        if(req.query.code != undefined && req.query.state != undefined) {
-            if(req.query.state == "lunartemple2112")
-            {
-                secretstring = req.query.code;
-                console.log("success!!");
+        /*
+            if(req.query.code != undefined && req.query.state != undefined) {
+                if(req.query.state == "lunartemple2112")
+                {
+                    secretstring = req.query.code;
+                    console.log("success!!");
 
 
-                var bodyTest = {
-                    heading: 'some text.. please...',
-                    priority: 0,
-                    state: false,
+                    var bodyTest = {
+                        heading: 'some text.. please...',
+                        priority: 0,
+                        state: false,
+                    }
+
+                    var bodyData = {
+                        client_id: '5b2714d62ded4a8dbc11cd22cdb5cb87',
+                        client_secret: '1d8df6f955344f6f86b299d88a91b0cc',
+                        code: secretstring,
+                        redirect_uri: 'https://asptodo-2049.herokuapp.com/'
+                    }
+
+                    updateClient(bodyData, res);
+                    //res.send('{' + tempRes + '}');
+                    console.log('some assy fucking sheet...' + tempRes);
+                    //res.send(tempRes);
                 }
-
-                var bodyData = {
-                    client_id: '5b2714d62ded4a8dbc11cd22cdb5cb87',
-                    client_secret: '1d8df6f955344f6f86b299d88a91b0cc',
-                    code: secretstring,
-                    redirect_uri: 'https://asptodo-2049.herokuapp.com/'
-                }
-
-                updateClient(bodyData, res);
-                //res.send('{' + tempRes + '}');
-                console.log('some assy fucking sheet...' + tempRes);
-                //res.send(tempRes);
             }
-        }
-        else
-        {
-            console.log('heheheh');
-        }
+            else
+            {
+                console.log('heheheh');
+            }
 
-    */
+        */
     });
 
 
@@ -202,7 +202,7 @@ module.exports = function(app, db) {
         // сомнительное решение конечно, но на скорую руку ничего лучше и понятнее не нашёл
         if(Array.isArray(req.body)) {
             req.body.forEach((dataItem) => {
-            arrData.push({ heading: dataItem.heading, priority: dataItem.priority, completed: dataItem.completed, noteDate: moment(dataItem.noteDate).format("YYYY-MM-DD") });
+                arrData.push({ heading: dataItem.heading, priority: dataItem.priority, completed: dataItem.completed, noteDate: moment(dataItem.noteDate).format("YYYY-MM-DD") });
             });
         }
         else
@@ -238,7 +238,7 @@ module.exports = function(app, db) {
     });
 
 
-
+    var tempRes = "";
     app.post('/api/access', (req, res, next) => {
 
         var scode = req.body.secretCode;
@@ -275,7 +275,7 @@ module.exports = function(app, db) {
             console.log('Ошибкама =( ' + error, response.body);
 
             if (!error && response.statusCode == 200) {
-                var tempRes = JSON.parse(response.body);
+                tempRes = JSON.parse(response.body);
 
                 // отсюда токен надобна брать...
                 console.log(tempRes.access_token);
@@ -325,6 +325,6 @@ module.exports = function(app, db) {
         res.send(res.myRandomMember);
     });
 
-/* acc886eff36a46bd58aad5415a5e898143e93768 */
+    /* acc886eff36a46bd58aad5415a5e898143e93768 */
 
 };
