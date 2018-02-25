@@ -36,7 +36,11 @@ module.exports = function (app, db) {
                 'Authorization': 'Bearer ' + app.locals.accessCode
             }
         }
-        request(clientServerOptions, callback);
+		if(app.locals.accessCode != undefined)
+			request(clientServerOptions, callback);
+		else
+			res.sendStatus(500);
+		
 
     }, (req, res) => {
         // отправляем, сохранённые задачи на сторону клиента
