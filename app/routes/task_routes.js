@@ -100,7 +100,7 @@ module.exports = function(app, db) {
 
 
 
-    var tempRes = "";
+
 
     app.get('/', (req, res) => {
     /*
@@ -275,7 +275,8 @@ module.exports = function(app, db) {
             console.log('Ошибкама =( ' + error, response.body);
 
             if (!error && response.statusCode == 200) {
-                tempRes = JSON.parse(response.body);
+                var tempRes = JSON.parse(response.body);
+
                 // отсюда токен надобна брать...
                 console.log(tempRes.access_token);
             }
