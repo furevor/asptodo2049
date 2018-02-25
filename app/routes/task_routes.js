@@ -14,6 +14,15 @@ module.exports = function (app, db) {
 
     });
 
+    app.get('/api/clear', (req, res) => {
+
+        tempRes = "";
+        app.locals.accessCode = undefined;
+        console.log("sector clear");
+        res.sendStatus(200);
+
+    });
+
     // метод выгружает из сервиса todoist задачи из указанного проекта
     app.get('/api/import/:pr_id', (req, res, next) => {
 
@@ -36,11 +45,16 @@ module.exports = function (app, db) {
                 'Authorization': 'Bearer ' + app.locals.accessCode
             }
         }
-		if(app.locals.accessCode != undefined)
-			request(clientServerOptions, callback);
-		else
-			res.sendStatus(500);
-		
+        if(app.locals.accessCode != undefined) {
+            console.log("access token - " + app.locals.accessCode);
+            request(clientServerOptions, callback);
+        }
+        else {
+            console.log("access token - " + app.locals.accessCode);
+            res.sendStatus(500);
+        }
+
+
 
     }, (req, res) => {
         // отправляем, сохранённые задачи на сторону клиента
@@ -205,7 +219,7 @@ module.exports = function (app, db) {
 
     }, (req, res) => {
         res.sendStatus(200);
-		//res.sendStatus(res.mySpookyVar);
+        //res.sendStatus(res.mySpookyVar);
     });
 
     // Метод предназначен для получения списка проектов с сервера todoist!
