@@ -1,5 +1,6 @@
 var ObjectID = require('mongodb').ObjectID;
 var request = require('request');
+var moment = require('moment');
 
 module.exports = function(app, db) {
 
@@ -9,7 +10,6 @@ module.exports = function(app, db) {
         const details = { '_id': new ObjectID(id) };
 
 
-        var arr = [{ _id: '12', heading: 'second note.. in process..', priority: 1, state: false }];
 
         // выглядит как суровая заплатка костыль...
         var cursor = db.collection('angulartasks').find().toArray((err, item) => {
@@ -72,8 +72,26 @@ module.exports = function(app, db) {
         var arr = [];
         for (var i = 0; i < res.myRandomMember.length; i++)
         {
-            if(res.myRandomMember[i].project_id == req.prID)
-            arr.push({heading: res.myRandomMember[i].content, priority: res.myRandomMember[i].priority, state: res.myRandomMember[i].completed});
+            if(res.myRandomMember[i].project_id == req.prID){
+
+                var priority = 0;
+
+                switch (res.myRandomMember[i].priority) {
+                    case 4:
+                        priority = 2;
+                        break;
+                    case 3:
+                        priority = 2;
+                        break;
+                    case 2:
+                        priority = 1;
+                        break;
+                    default:
+                        priority = 0;
+                }
+                arr.push({heading: res.myRandomMember[i].content, priority: priority, completed: res.myRandomMember[i].completed});
+            }
+
         }
         res.send(arr);
     });
@@ -143,11 +161,10 @@ module.exports = function(app, db) {
 
     }
 
-    /*
+
     //метод, что призван отдавать note по id!!
     app.get('/api/tasks/:id', (req, res) => {
 
-        //const id = '5a851af3d071fe03aca92e36';
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
 
@@ -160,7 +177,7 @@ module.exports = function(app, db) {
             }
         });
     });
-     */
+
 
     app.delete('/api/tasks/:id', (req, res) => {
 
@@ -185,18 +202,19 @@ module.exports = function(app, db) {
         // сомнительное решение конечно, но на скорую руку ничего лучше и понятнее не нашёл
         if(Array.isArray(req.body)) {
             req.body.forEach((dataItem) => {
-            arrData.push({ heading: dataItem.heading, priority: dataItem.priority, state: dataItem.state });
+            arrData.push({ heading: dataItem.heading, priority: dataItem.priority, completed: dataItem.completed, noteDate: moment(dataItem.noteDate).format("YYYY-MM-DD") });
             });
         }
         else
         {
-            arrData.push({ heading: req.body.heading, priority: req.body.priority, state: req.body.state });
+            arrData.push({ heading: req.body.heading, priority: req.body.priority, completed: req.body.completed, noteDate: moment(req.body.noteDate).format("YYYY-MM-DD") });
         }
 
         db.collection('angulartasks').insert(arrData, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
+
                 res.send(result.ops[0]);
             }
         });
@@ -207,7 +225,8 @@ module.exports = function(app, db) {
     app.put('/api/tasks/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
-        const note = { heading: req.body.heading, priority: req.body.priority, state: req.body.state };
+        const note = { heading: req.body.heading, priority: req.body.priority, completed: req.body.completed, noteDate: req.body.noteDate };
+        console.log(req.body);
         db.collection('angulartasks').update(details, note, (err, result) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
@@ -284,7 +303,7 @@ module.exports = function(app, db) {
     // Метод предназначен для получения списка проектов с сервера todoist!
     app.get('/api/import', (req, res, next) => {
         console.log('hello from here!!!');
-
+        //app.locals.accessCode = 'acc886eff36a46bd58aad5415a5e898143e93768';
         function callback(error, response, body) {
             console.log('hello from callback!!!');
             console.log(response.statusCode);
