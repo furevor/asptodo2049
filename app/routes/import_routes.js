@@ -2,7 +2,6 @@ var request = require('request');
 var express = require('express');
 var router = express.Router();
 
-module.exports = router;
 
 router.get('/clear', (req, res) => {
 
@@ -147,3 +146,5 @@ router.post('/access', (req, res, next) => {
     res.sendStatus(200);
     //res.sendStatus(res.mySpookyVar);
 });
+
+module.exports = router;
