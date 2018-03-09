@@ -1,5 +1,11 @@
-const noteRoutes = require('./task_routes');
+const taskRoutes = require('./task_routes');
+const importRoutes = require('./import_routes');
+
+
 module.exports = function(app, db) {
-    noteRoutes(app, db);
-    // Тут, позже, будут и другие обработчики маршрутов
+
+    app.use('/api/tasks', taskRoutes(db));
+
+    app.use('/api/import', importRoutes);
+
 };
