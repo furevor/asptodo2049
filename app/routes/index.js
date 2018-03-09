@@ -6,6 +6,6 @@ module.exports = function(app, db) {
 
     app.use('/api/tasks', taskRoutes(db));
 
-    app.use('/api/import', importRoutes);
+    app.use('/api/import', importRoutes(app));
 
 };
