@@ -97,6 +97,7 @@ module.exports = function (app) {
         });
 
         result = JSON.parse(result);
+        console.log("Мои проекты!! - " + result.projects);
         res.send(result.projects);
 
     }));
@@ -146,7 +147,7 @@ module.exports = function (app) {
 
         //console.log(await rp(clientServerOptions));
         tempRes = JSON.parse(await rp(clientServerOptions));
-        console.log(tempRes);
+        console.log("Мой секретный код!! - " + tempRes);
         // важная строка!
         app.locals.accessCode = tempRes.access_token;
         res.sendStatus(200);
