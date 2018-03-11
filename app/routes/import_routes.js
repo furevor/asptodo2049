@@ -97,7 +97,7 @@ module.exports = function (app) {
         });
 
         result = JSON.parse(result);
-        console.log("Мои проекты!! - " + result.projects);
+
         res.send(result.projects);
 
     }));
@@ -110,7 +110,7 @@ module.exports = function (app) {
     router.post('/access', asyncMiddleware(async function(req, res, next) {
 
         var scode = req.body.secretCode;
-        console.log('Получен секретный код! - ' + scode);
+        console.log('Получен секретный код! - ');
 
         var bodyData = {
             client_id: '5b2714d62ded4a8dbc11cd22cdb5cb87',
@@ -128,26 +128,8 @@ module.exports = function (app) {
             }
         };
 
-        function callback(error, response) {
-            console.log('Ошибкама =( ' + error, response.body);
-
-            if (!error && response.statusCode == 200) {
-                tempRes = JSON.parse(response.body);
-            }
-            else {
-                // жутчайший костыль, если останется время, то поправлю... (нет)
-                res.mySpookyVar = response.statusCode;
-            }
-            // важная строка! (не спрашивайте почему)
-            app.locals.accessCode = tempRes.access_token;
-
-            next();
-            return;
-        }
-
-        //console.log(await rp(clientServerOptions));
         tempRes = JSON.parse(await rp(clientServerOptions));
-        console.log("Мой секретный код!! - " + tempRes);
+        
         // важная строка!
         app.locals.accessCode = tempRes.access_token;
         res.sendStatus(200);
