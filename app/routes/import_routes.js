@@ -1,32 +1,32 @@
 var request = require('request');
 var express = require('express');
 var router = express.Router();
+var rp = require('request-promise');
 
+// Alex Bazhenov Wrapper
+// https://medium.com/@Abazhenov/using-async-await-in-express-with-node-8-b8af872c0016
+const asyncMiddleware = fn =>
+    (req, res, next) => {
+        Promise.resolve(fn(req, res, next))
+            .catch(next);
+    };
 
 module.exports = function (app) {
 
-    router.get('/clear', (req, res) => {
+    router.get('/clear', asyncMiddleware(async function(req, res, next) {
 
         tempRes = "";
         app.locals.accessCode = undefined;
         console.log("sector clear");
         res.sendStatus(200);
 
-    });
+    }));
 
 // метод выгружает из сервиса todoist задачи из указанного проекта
-    router.get('/:pr_id', (req, res, next) => {
+    router.get('/:pr_id', asyncMiddleware(async function(req, res, next) {
 
+        //app.locals.accessCode = "acc886eff36a46bd58aad5415a5e898143e93768";
         req.prID = req.params.pr_id;
-
-        function callback(error, response, body) {
-
-            if (!error && response.statusCode == 200) {
-                var info = JSON.parse(body);
-            }
-            res.myRandomMember = info;
-            next();
-        }
 
         var clientServerOptions = {
             uri: 'https://beta.todoist.com/API/v8/tasks',
@@ -35,89 +35,88 @@ module.exports = function (app) {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + app.locals.accessCode
             }
-        }
+        };
+
+
         if (app.locals.accessCode != undefined) {
             console.log("access token - " + app.locals.accessCode);
-            request(clientServerOptions, callback);
+            var result = JSON.parse(await rp(clientServerOptions));
+            res.send(prepareData(result));
         }
         else {
             console.log("access token - " + app.locals.accessCode);
             res.sendStatus(500);
         }
 
+        // подготовка данных, предобработка статусов задачи (номера в todoist лежат в диапазоне [1;4]
+        function prepareData(arr_) {
+            var arr = [];
+            for (var i = 0; i < arr_.length; i++) {
+                if (arr_[i].project_id == req.prID) {
 
-    }, (req, res) => {
-        // отправляем, сохранённые задачи на сторону клиента
-        var arr = [];
-        for (var i = 0; i < res.myRandomMember.length; i++) {
-            if (res.myRandomMember[i].project_id == req.prID) {
+                    var priority = 0;
 
-                var priority = 0;
-
-                switch (res.myRandomMember[i].priority) {
-                    case 4:
-                        priority = 2;
-                        break;
-                    case 3:
-                        priority = 2;
-                        break;
-                    case 2:
-                        priority = 1;
-                        break;
-                    default:
-                        priority = 0;
+                    switch (arr_[i].priority) {
+                        case 4:
+                            priority = 2;
+                            break;
+                        case 3:
+                            priority = 2;
+                            break;
+                        case 2:
+                            priority = 1;
+                            break;
+                        default:
+                            priority = 0;
+                    }
+                    arr.push({
+                        heading: arr_[i].content,
+                        priority: priority,
+                        completed: arr_[i].completed
+                    });
                 }
-                arr.push({
-                    heading: res.myRandomMember[i].content,
-                    priority: priority,
-                    completed: res.myRandomMember[i].completed
-                });
-            }
 
+            }
+            return arr;
         }
-        res.send(arr);
-    });
+
+    }));
 
 
 // Метод предназначен для получения списка проектов с сервера todoist!
-    router.get('/', (req, res, next) => {
+    router.get('/', asyncMiddleware(async function(req, res, next) {
 
-        function callback(error, response, body) {
+        //app.locals.accessCode = "acc886eff36a46bd58aad5415a5e898143e93768";
 
-            if (!error && response.statusCode == 200) {
-                var info = JSON.parse(body);
-            }
-            res.myRandomMember = info.projects;
-            next();
-        }
-
-        request.post('https://todoist.com/api/v7/sync', {
+        var result = await rp.post('https://todoist.com/api/v7/sync', {
             form: {
                 token: app.locals.accessCode,
                 sync_token: '*',
                 resource_types: '["projects"]'
             }
-        }, callback);
-    }, (req, res) => {
-        res.send(res.myRandomMember);
-    });
+        });
+
+        result = JSON.parse(result);
+        res.send(result.projects);
+
+    }));
 
 
 // временно сохраним сюда access_token
     var tempRes = "";
 
 // метод предназначен для обмена кода доступа на access_token
-    router.post('/access', (req, res, next) => {
+    router.post('/access', asyncMiddleware(async function(req, res, next) {
 
         var scode = req.body.secretCode;
-        console.log('Получен секретный код!');
+        console.log('Получен секретный код! - ' + scode);
 
         var bodyData = {
             client_id: '5b2714d62ded4a8dbc11cd22cdb5cb87',
             client_secret: '1d8df6f955344f6f86b299d88a91b0cc',
             code: scode,
             redirect_uri: 'https://asptodo-2049.herokuapp.com/'
-        }
+        };
 
         var clientServerOptions = {
             uri: 'https://todoist.com/oauth/access_token',
@@ -126,8 +125,9 @@ module.exports = function (app) {
             headers: {
                 'Content-Type': 'application/json'
             }
-        }
-        request(clientServerOptions, function (error, response) {
+        };
+
+        function callback(error, response) {
             console.log('Ошибкама =( ' + error, response.body);
 
             if (!error && response.statusCode == 200) {
@@ -142,13 +142,17 @@ module.exports = function (app) {
 
             next();
             return;
-        });
+        }
 
-    }, (req, res) => {
+        //console.log(await rp(clientServerOptions));
+        tempRes = JSON.parse(await rp(clientServerOptions));
+        console.log(tempRes);
+        // важная строка!
+        app.locals.accessCode = tempRes.access_token;
         res.sendStatus(200);
-        //res.sendStatus(res.mySpookyVar);
-    });
-    
+
+    }));
+
     return router;
 
 };

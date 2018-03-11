@@ -4,20 +4,25 @@ var moment = require('moment');
 var express = require('express');
 var router = express.Router();
 
+// Alex Bazhenov Wrapper
+// https://medium.com/@Abazhenov/using-async-await-in-express-with-node-8-b8af872c0016
+const asyncMiddleware = fn =>
+    (req, res, next) => {
+        Promise.resolve(fn(req, res, next))
+            .catch(next);
+    };
+
+
 module.exports = function (db) {
 
+    router.get('/', asyncMiddleware(async function(req, res, next) {
+        //console.log("Just should work, I hope...");
+        var item = await db.collection('angulartasks').find().toArray();
+        res.send(item);
+    }));
 
-    router.get('/', (req, res) => {
 
-        // получаем задачи из базы в виде массива
-        var cursor = db.collection('angulartasks').find().toArray((err, item) => {
-            res.send(item);
-            return item;
-        });
-
-    });
-
-    router.post('/', (req, res) => {
+    router.post('/', asyncMiddleware(async function(req, res, next) {
 
         var arrData = [];
 
@@ -41,50 +46,39 @@ module.exports = function (db) {
             });
         }
 
-        db.collection('angulartasks').insert(arrData, (err, result) => {
-            if (err) {
-                res.send({'error': 'An error has occurred'});
-            } else {
+        var result = await db.collection('angulartasks').insert(arrData);
+        res.send(result.ops[0]);
 
-                res.send(result.ops[0]);
-            }
-        });
 
-    });
-
+    }));
 
     //метод, что призван отдавать note по id!!
-    router.get('/:id', (req, res) => {
+    router.get('/:id', asyncMiddleware(async function(req, res, next) {
+
+        const id = req.params.id;
+        const details = {'_id': new ObjectID(id)};
+
+        var item = await db.collection('angulartasks').findOne(details);
+        res.send(item);
+
+    }));
+
+
+    router.delete('/:id', asyncMiddleware(async function(req, res, next) {
 
         const id = req.params.id;
         const details = {'_id': new ObjectID(id)};
 
 
-        db.collection('angulartasks').findOne(details, (err, item) => {
-            if (err) {
-                res.send({'error': 'An error has occurred'});
-            } else {
-                res.send(item);
-            }
-        });
-    });
+        var result = await db.collection('angulartasks').remove(details);
+        res.send('{Note ' + id + ' deleted!}');
 
-    router.delete('/:id', (req, res) => {
 
-        const id = req.params.id;
-        const details = {'_id': new ObjectID(id)};
+    }));
 
-        db.collection('angulartasks').remove(details, (err, item) => {
-            if (err) {
-                res.send({'error': 'An error has occurred'});
-            } else {
-                res.send('{Note ' + id + ' deleted!}');
-            }
-        });
-    });
 
     // маршрут вызывается для сохранения отредактированной задачи на сервере
-    router.put('/:id', (req, res) => {
+    router.put('/:id', asyncMiddleware(async function(req, res, next) {
         const id = req.params.id;
         const details = {'_id': new ObjectID(id)};
         const note = {
@@ -94,13 +88,15 @@ module.exports = function (db) {
             noteDate: req.body.noteDate
         };
         console.log(req.body);
-        db.collection('angulartasks').update(details, note, (err, result) => {
-            if (err) {
-                res.send({'error': 'An error has occurred'});
-            } else {
-                res.sendStatus(200);
-            }
-        });
+        await db.collection('angulartasks').update(details, note);
+        res.sendStatus(200);
+
+    }));
+
+
+    router.use(function(err, req, res, next) {
+        console.error(err);
+        res.status(500).json({message: 'an error occurred'});
     });
 
     return router;
