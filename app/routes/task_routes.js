@@ -1,5 +1,6 @@
 var ObjectID = require('mongodb').ObjectID;
 var moment = require('moment');
+var config = require('../../config');
 
 var express = require('express');
 var router = express.Router();
@@ -17,7 +18,7 @@ module.exports = function (db) {
 
     router.get('/', asyncMiddleware(async function(req, res, next) {
         //console.log("Just should work, I hope...");
-        var item = await db.collection('angulartasks').find().toArray();
+        var item = await db.collection(config.DBcollectionName).find().toArray();
         res.send(item);
     }));
 
@@ -46,7 +47,7 @@ module.exports = function (db) {
             });
         }
 
-        var result = await db.collection('angulartasks').insert(arrData);
+        var result = await db.collection(config.DBcollectionName).insert(arrData);
         res.send(result.ops[0]);
 
 
@@ -58,7 +59,7 @@ module.exports = function (db) {
         const id = req.params.id;
         const details = {'_id': new ObjectID(id)};
 
-        var item = await db.collection('angulartasks').findOne(details);
+        var item = await db.collection(config.DBcollectionName).findOne(details);
         res.send(item);
 
     }));
@@ -70,7 +71,7 @@ module.exports = function (db) {
         const details = {'_id': new ObjectID(id)};
 
 
-        var result = await db.collection('angulartasks').remove(details);
+        var result = await db.collection(config.DBcollectionName).remove(details);
         res.send('{Note ' + id + ' deleted!}');
 
 
@@ -88,7 +89,7 @@ module.exports = function (db) {
             noteDate: req.body.noteDate
         };
         console.log(req.body);
-        await db.collection('angulartasks').update(details, note);
+        await db.collection(config.DBcollectionName).update(details, note);
         res.sendStatus(200);
 
     }));

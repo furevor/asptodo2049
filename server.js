@@ -1,7 +1,7 @@
 const express        = require('express');
 const MongoClient    = require('mongodb').MongoClient;
 const bodyParser     = require('body-parser');
-const db             = require('./config/db');
+const config         = require('./config');
 const app            = express();
 
 const port = 8000;
@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
-MongoClient.connect(db.url, (err, database) => {
+MongoClient.connect(config.dbUrl, (err, database) => {
     if (err) return console.log(err);
 
     // небольшая заплатка в связи с использованием версии 3+

@@ -1,0 +1,6 @@
+{
+  "task_route": "/api/tasks",
+  "import_route": "/api/import",
+  "dbUrl": "mongodb://furevor:aspirity@ds229388.mlab.com:29388/tasks",
+  "DBcollectionName": "angulartasks"
+}

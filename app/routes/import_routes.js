@@ -1,4 +1,3 @@
-var request = require('request');
 var express = require('express');
 var router = express.Router();
 var rp = require('request-promise');
@@ -129,7 +128,7 @@ module.exports = function (app) {
         };
 
         tempRes = JSON.parse(await rp(clientServerOptions));
-        
+
         // важная строка!
         app.locals.accessCode = tempRes.access_token;
         res.sendStatus(200);
